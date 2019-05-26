@@ -30,6 +30,46 @@ public final class ArrayHelper {
         }
     }
 
+    public static double destructiveBranchlessMedian(double[] array, int from, int until) {
+        int index = (from + until) >>> 1;
+        int to = until - 1;
+        if (from == to) {
+            return array[from];
+        }
+        while (true) {
+            double pivot = array[(from + to) >>> 1];
+            if (from + 4 < to) {
+                double mid = (array[from] + array[to]) / 2;
+                pivot = (pivot + mid) / 2;
+            }
+
+            int l = from, r = to;
+            do {
+                double vl = array[l];
+                double vr = array[r];
+                int cl = vl >= pivot ? 1 : 0;
+                int cr = vr <= pivot ? 1 : 0;
+                int xor = (l ^ r) & -(cl & cr);
+                array[l ^ xor] = vl;
+                array[r ^ xor] = vr;
+                l += (1 - cl) | cr;
+                r -= (1 - cr) | cl;
+            } while (l <= r);
+
+            if (index < r) {
+                to = r;
+            } else if (l < index) {
+                from = l;
+            } else if (r == index) {
+                return max(array, from, r + 1);
+            } else if (l == index) {
+                return min(array, l, to + 1);
+            } else {
+                return array[index];
+            }
+        }
+    }
+
     public static double destructiveMedian(double[] array, int from, int until) {
         int index = (from + until) >>> 1;
         int to = until - 1;

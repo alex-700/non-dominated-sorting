@@ -70,4 +70,12 @@ public class MedianBenchmark {
             bh.consume(ArrayHelper.destructiveMedian(temp, 0, temp.length));
         }
     }
+
+    @Benchmark
+    public void branchlessQuickSelect(Blackhole bh) {
+        for (double[] test : data) {
+            System.arraycopy(test, 0, temp, 0, test.length);
+            bh.consume(ArrayHelper.destructiveBranchlessMedian(temp, 0, temp.length));
+        }
+    }
 }
