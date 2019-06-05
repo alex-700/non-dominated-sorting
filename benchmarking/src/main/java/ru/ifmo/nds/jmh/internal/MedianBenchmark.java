@@ -29,6 +29,7 @@ public class MedianBenchmark {
 
     private double[][] data;
     private double[] temp;
+    private double[] temp2;
 
     @Setup
     public void initialize() {
@@ -53,14 +54,7 @@ public class MedianBenchmark {
                 throw new AssertionError("Unknown data type: '" + type + "'");
         }
         temp = new double[size];
-    }
-
-    @Benchmark
-    public void baseline(Blackhole bh) {
-        for (double[] test : data) {
-            System.arraycopy(test, 0, temp, 0, test.length);
-            bh.consume(temp);
-        }
+        temp2 = new double[size];
     }
 
     @Benchmark
@@ -75,7 +69,7 @@ public class MedianBenchmark {
     public void branchlessQuickSelect(Blackhole bh) {
         for (double[] test : data) {
             System.arraycopy(test, 0, temp, 0, test.length);
-            bh.consume(ArrayHelper.destructiveBranchlessMedian(temp, 0, temp.length));
+            bh.consume(ArrayHelper.destructiveBranchlessMedian(temp, 0, temp.length, temp2));
         }
     }
 }

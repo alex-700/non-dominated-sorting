@@ -30,7 +30,7 @@ public final class ArrayHelper {
         }
     }
 
-    public static double destructiveBranchlessMedian(double[] array, int from, int until) {
+    public static double destructiveBranchlessMedian(double[] array, int from, int until, double[] temp) {
         int index = (from + until) >>> 1;
         int to = until - 1;
         if (from == to) {
@@ -38,34 +38,32 @@ public final class ArrayHelper {
         }
         while (true) {
             double pivot = array[(from + to) >>> 1];
-            if (from + 4 < to) {
-                double mid = (array[from] + array[to]) / 2;
-                pivot = (pivot + mid) / 2;
-            }
 
             int l = from, r = to;
-            do {
-                double vl = array[l];
-                double vr = array[r];
-                int cl = vl >= pivot ? 1 : 0;
-                int cr = vr <= pivot ? 1 : 0;
-                int xor = (l ^ r) & -(cl & cr);
-                array[l ^ xor] = vl;
-                array[r ^ xor] = vr;
-                l += (1 - cl) | cr;
-                r -= (1 - cr) | cl;
-            } while (l <= r);
+            for (int i = from; i <= to; ++i) {
+                double v = array[i];
+                long diff = Double.doubleToRawLongBits(v - pivot);
+                array[l] = v;
+                temp[r] = v;
+                l += (int) (diff >>> 63);
+                r -= (int) ((-diff) >>> 63);
+            }
+            --l;
+            ++r;
 
-            if (index < r) {
-                to = r;
-            } else if (l < index) {
-                from = l;
-            } else if (r == index) {
-                return max(array, from, r + 1);
+            if (index < l) {
+                to = l;
+            } else if (r < index) {
+                from = r;
+                double[] swap = temp;
+                temp = array;
+                array = swap;
             } else if (l == index) {
-                return min(array, l, to + 1);
+                return maxUnchecked(array, from, l);
+            } else if (r == index) {
+                return minUnchecked(temp, r, to);
             } else {
-                return array[index];
+                return pivot;
             }
         }
     }
@@ -96,9 +94,9 @@ public final class ArrayHelper {
             } else if (l < index) {
                 from = l;
             } else if (r == index) {
-                return max(array, from, r + 1);
+                return maxUnchecked(array, from, r);
             } else if (l == index) {
-                return min(array, l, to + 1);
+                return minUnchecked(array, l, to);
             } else {
                 return array[index];
             }
@@ -316,33 +314,25 @@ public final class ArrayHelper {
         return until + 1;
     }
 
-    public static double max(double[] array, int from, int until) {
-        if (from >= until) {
-            return Double.NEGATIVE_INFINITY;
-        } else {
-            double rv = array[from];
-            for (int i = from + 1; i < until; ++i) {
-                double v = array[i];
-                if (rv < v) {
-                    rv = v;
-                }
+    private static double maxUnchecked(double[] array, int from, int to) {
+        double rv = array[from];
+        for (int i = from + 1; i <= to; ++i) {
+            double v = array[i];
+            if (rv < v) {
+                rv = v;
             }
-            return rv;
         }
+        return rv;
     }
 
-    public static double min(double[] array, int from, int until) {
-        if (from >= until) {
-            return Double.POSITIVE_INFINITY;
-        } else {
-            double rv = array[from];
-            for (int i = from + 1; i < until; ++i) {
-                double v = array[i];
-                if (rv > v) {
-                    rv = v;
-                }
+    private static double minUnchecked(double[] array, int from, int to) {
+        double rv = array[from];
+        for (int i = from + 1; i <= to; ++i) {
+            double v = array[i];
+            if (rv > v) {
+                rv = v;
             }
-            return rv;
         }
+        return rv;
     }
 }
