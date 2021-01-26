@@ -16,7 +16,7 @@ public abstract class JFBBase extends NonDominatedSorting {
     int[] ranks;
 
     // Data which is immutable throughout the actual sorting.
-    private double[][] points;
+    protected double[][] points;
     double[][] transposedPoints;
     int maximalMeaningfulRank;
 
@@ -81,7 +81,7 @@ public abstract class JFBBase extends NonDominatedSorting {
     }
 
     @Override
-    protected final void sortChecked(double[][] points, int[] ranks, int maximalMeaningfulRank) {
+    protected void sortChecked(double[][] points, int[] ranks, int maximalMeaningfulRank) {
         final int n = points.length;
         final int dim = points[0].length;
         Arrays.fill(ranks, 0);
@@ -147,7 +147,7 @@ public abstract class JFBBase extends NonDominatedSorting {
     protected abstract int sweepA(int from, int until);
     protected abstract int sweepB(int goodFrom, int goodUntil, int weakFrom, int weakUntil, int tempFrom);
 
-    private int helperA(int from, int until, int obj) {
+    protected int helperA(int from, int until, int obj) {
         int n = until - from;
         if (n <= 2) {
             if (n == 2) {
@@ -286,7 +286,7 @@ public abstract class JFBBase extends NonDominatedSorting {
         };
     }
 
-    private int helperB(int goodFrom, int goodUntil, int weakFrom, int weakUntil, int obj, int tempFrom) {
+    protected int helperB(int goodFrom, int goodUntil, int weakFrom, int weakUntil, int obj, int tempFrom) {
         if (goodUntil - goodFrom > 0 && weakUntil - weakFrom > 0) {
             goodUntil = ArrayHelper.findLastWhereNotGreater(indices, goodFrom, goodUntil, indices[weakUntil - 1]);
             weakFrom = ArrayHelper.findWhereNotSmaller(indices, weakFrom, weakUntil, indices[goodFrom]);
@@ -350,7 +350,7 @@ public abstract class JFBBase extends NonDominatedSorting {
         return weakUntil;
     }
 
-    private void twoDimensionalCase(double[][] points, int[] ranks) {
+    protected void twoDimensionalCase(double[][] points, int[] ranks) {
         int maxRank = 1;
         int n = ranks.length;
 
