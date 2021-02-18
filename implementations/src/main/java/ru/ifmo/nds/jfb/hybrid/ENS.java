@@ -1,4 +1,4 @@
-package ru.ifmo.nds.jfb.hybrid;
+    package ru.ifmo.nds.jfb.hybrid;
 
 import ru.ifmo.nds.jfb.HybridAlgorithmWrapper;
 import ru.ifmo.nds.jfb.JFBBase;
@@ -8,9 +8,9 @@ import ru.ifmo.nds.util.DominanceHelper;
 
 import java.util.Arrays;
 
-public final class ENS extends HybridAlgorithmWrapper {
-    private final int threshold3D;
-    private final int thresholdAll;
+public class ENS extends HybridAlgorithmWrapper {
+    protected final int threshold3D;
+    protected final int thresholdAll;
 
     public ENS(int threshold3D, int thresholdAll) {
         this.threshold3D = threshold3D;
@@ -32,19 +32,19 @@ public final class ENS extends HybridAlgorithmWrapper {
         return new Instance(ranks, indices, points, threshold3D, thresholdAll);
     }
 
-    private static final class Instance extends HybridAlgorithmWrapper.Instance {
-        private static final int STORAGE_MULTIPLE = 5;
+    protected static class Instance extends HybridAlgorithmWrapper.Instance {
+        protected static final int STORAGE_MULTIPLE = 5;
 
-        private final int[] space;
-        private final int[] ranks;
-        private final int[] indices;
-        private final double[][] points;
-        private final double[][] exPoints;
+        protected final int[] space;
+        protected final int[] ranks;
+        protected final int[] indices;
+        protected final double[][] points;
+        protected final double[][] exPoints;
 
         private final int threshold3D;
         private final int thresholdAll;
 
-        private Instance(int[] ranks, int[] indices, double[][] points, int threshold3D, int thresholdAll) {
+        protected Instance(int[] ranks, int[] indices, double[][] points, int threshold3D, int thresholdAll) {
             this.ranks = ranks;
             this.indices = indices;
             this.points = points;
@@ -54,7 +54,7 @@ public final class ENS extends HybridAlgorithmWrapper {
             this.thresholdAll = thresholdAll;
         }
 
-        private boolean notHookCondition(int size, int obj) {
+        protected boolean notHookCondition(int size, int obj) {
             switch (obj) {
                 case 1:
                     return true;
@@ -155,8 +155,8 @@ public final class ENS extends HybridAlgorithmWrapper {
             return false;
         }
 
-        private int helperBSingleRank(int rank, int goodFrom, int goodUntil,
-                                      int weakFrom, int weakUntil, int obj, int maximalMeaningfulRank, int tempFrom) {
+        protected int helperBSingleRank(int rank, int goodFrom, int goodUntil,
+                                        int weakFrom, int weakUntil, int obj, int maximalMeaningfulRank, int tempFrom) {
             int minUpdated = weakUntil;
             int offset = tempFrom - goodFrom;
             for (int good = goodFrom; good < goodUntil; ++good) {
@@ -187,17 +187,17 @@ public final class ENS extends HybridAlgorithmWrapper {
             space[ranksAndSlicesOffset] = firstRank;
             space[sortedIndicesOffset] = ranksAndSlicesOffset;
             for (int i = goodFrom + 1, ri = ranksAndSlicesOffset, si = sortedIndicesOffset; i < goodUntil; ++i) {
-                ++ri;
-                ++si;
+//                ++ri;
+//                ++si;
                 int rank = -ranks[indices[i]];
                 allSame &= firstRank == rank;
-                space[ri] = rank;
-                space[si] = ri;
+                space[++ri] = rank;
+                space[++si] = ri;
             }
             return allSame ? firstRank : 1;
         }
 
-        private static int distributePointsBetweenSlices(int[] space, int from, int until, int sliceOffset, int pointsBySlicesOffset) {
+        protected static int distributePointsBetweenSlices(int[] space, int from, int until, int sliceOffset, int pointsBySlicesOffset) {
             int sliceLast = sliceOffset - 2;
             int atSliceLast = 0;
             int prevRank = 1;
@@ -227,7 +227,7 @@ public final class ENS extends HybridAlgorithmWrapper {
             return sliceLast;
         }
 
-        private int findRankInSlices(int sliceOffset, int sliceLast, int wi, int obj, int sliceRankOffset) {
+        protected int findRankInSlices(int sliceOffset, int sliceLast, int wi, int obj, int sliceRankOffset) {
             int currSlice = sliceLast;
             int sliceRankIndex = ((currSlice - sliceOffset) >>> 1) + sliceRankOffset;
             int weakRank = ranks[wi];
@@ -273,14 +273,12 @@ public final class ENS extends HybridAlgorithmWrapper {
                 int minOverflowed = weakUntil;
                 for (int weak = weakFrom, good = goodFrom, sliceOfGood = ranksAndSlicesOffset; weak < weakUntil; ++weak) {
                     int wi = indices[weak];
-                    int gi;
-                    while (good < goodUntil && (gi = indices[good]) < wi) {
+
+                    for (int gi; good < goodUntil && (gi = indices[good]) < wi; ++good, ++sliceOfGood) {
                         int sliceTailIndex = space[sliceOfGood] + 1;
                         int spaceAtTail = space[sliceTailIndex];
                         exPoints[spaceAtTail] = points[gi];
                         space[sliceTailIndex] = spaceAtTail + 1;
-                        ++good;
-                        ++sliceOfGood;
                     }
                     int weakRank = findRankInSlices(sliceOffset, sliceLast, wi, obj, sortedIndicesOffset);
                     if (weakRank > maximalMeaningfulRank && minOverflowed > weak) {

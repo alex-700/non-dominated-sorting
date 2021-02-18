@@ -2,6 +2,7 @@ package ru.ifmo.nds.jfb.hybrid;
 
 import ru.ifmo.nds.jfb.HybridAlgorithmWrapper;
 import ru.ifmo.nds.jfb.JFBBase;
+import ru.ifmo.nds.util.ArrayHelper;
 
 public final class LinearNDS extends HybridAlgorithmWrapper {
     private static final int THRESHOLD_3D = 50;
@@ -66,9 +67,7 @@ public final class LinearNDS extends HybridAlgorithmWrapper {
             }
             for (int good = goodFrom, weakMin = weakFrom; good < goodUntil; ++good) {
                 int goodIndex = indices[good];
-                while (weakMin < weakUntil && indices[weakMin] < goodIndex) {
-                    ++weakMin;
-                }
+                weakMin = ArrayHelper.findWhereNotSmaller(indices, weakMin, weakUntil, goodIndex);
                 weakUntil = JFBBase.updateByPoint(ranks, indices, points, maximalMeaningfulRank, goodIndex, weakMin, weakUntil, obj);
             }
             return weakUntil;

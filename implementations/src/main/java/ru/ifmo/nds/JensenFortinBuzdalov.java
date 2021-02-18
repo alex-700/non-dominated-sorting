@@ -1,10 +1,8 @@
 package ru.ifmo.nds;
 
 import ru.ifmo.nds.jfb.*;
-import ru.ifmo.nds.jfb.hybrid.Dummy;
+import ru.ifmo.nds.jfb.hybrid.*;
 import ru.ifmo.nds.jfb.hybrid.ENS;
-import ru.ifmo.nds.jfb.hybrid.LinearNDS;
-import ru.ifmo.nds.jfb.hybrid.NDT;
 import ru.ifmo.nds.util.FenwickRankQueryStructureDouble;
 import ru.ifmo.nds.util.RedBlackRankQueryStructure;
 import ru.ifmo.nds.util.VanEmdeBoasRankQueryStructureInt;
@@ -46,5 +44,9 @@ public final class JensenFortinBuzdalov {
 
     public static NonDominatedSortingFactory getRedBlackTreeSweepHybridNDTImplementation(int threshold, int allowedThreads) {
         return (p, d) -> new JFBDouble(new RedBlackRankQueryStructure(p), d, allowedThreads, new NDT(100, 20000, threshold));
+    }
+
+    public static NonDominatedSortingFactory getRedBlackTreeSweepHybridENSHImplementation(int allowedThreads) {
+        return (p, d) -> new JFBDouble(new RedBlackRankQueryStructure(p), d, allowedThreads, new ENSH(100, 200));
     }
 }
